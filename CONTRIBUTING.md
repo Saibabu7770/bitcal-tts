@@ -11,6 +11,12 @@ pip install -e ".[dev,research]"
 python -m pytest tests/ -q
 ```
 
+The default `pytest` configuration enforces **≥90%** line coverage on `bitcal_tts`. For a faster loop without coverage:
+
+```bash
+python -m pytest tests/ -q --no-cov
+```
+
 ## Pull requests
 
 - Keep changes focused on a single concern.

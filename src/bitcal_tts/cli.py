@@ -57,12 +57,12 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     if args.command == "hf-smoke":
-        from bitcal_tts.integrations.hf_inference import hf_smoke_forward
+        from bitcal_tts.integrations.hf_inference import hf_smoke_report
 
-        hf_smoke_forward(args.model, args.prompt)
+        hf_smoke_report(args.model, args.prompt)
         return
 
-    parser.print_help()
+    raise AssertionError("unhandled CLI branch; this should be unreachable")
 
 
 def _print_doctor() -> None:

@@ -19,6 +19,15 @@ class HaltingPolicy:
     min_budget_to_continue: int = 32
     stop_confidence_threshold: float = 0.75
 
+    def __post_init__(self) -> None:
+        if self.min_budget_to_continue < 0:
+            raise ValueError(f"min_budget_to_continue must be >= 0, got {self.min_budget_to_continue}")
+        if self.escalate_entropy_threshold < self.stop_entropy_threshold:
+            raise ValueError(
+                "escalate_entropy_threshold must be >= stop_entropy_threshold "
+                f"(got escalate={self.escalate_entropy_threshold}, stop={self.stop_entropy_threshold})"
+            )
+
     def decide(
         self,
         entropy: float,

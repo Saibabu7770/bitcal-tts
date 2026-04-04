@@ -25,3 +25,21 @@ def test_halting_metrics_keys():
     assert m["accuracy"] == 0.0
     assert m["tokens_used"] == 50
     assert m["n_stops"] == 1
+
+
+def test_loop_zero_budget_no_steps():
+    b = TokenBudget(max_tokens=0)
+    trace = run_fixed_budget_loop(b, max_steps=5, step_fn=mock_step_fn(vocab_size=64))
+    assert len(trace.texts) == 0
+
+
+def test_loop_partial_steps_until_budget():
+    b = TokenBudget(max_tokens=10)
+
+    def step_fn(step, _budget):
+        return "x", torch.zeros(8), None, 3
+
+    trace = run_fixed_budget_loop(b, max_steps=100, step_fn=step_fn)
+    # 3+3+3 = 9 ok, next would be 12 > 10 -> after 3 steps used=9, remaining=1; step 4: consume 3 -> 12 used but we check exhausted at start of iteration
+    # Actually after step 3: used=9, remaining=1. Step 4: not exhausted, consume 3 -> used=12, remaining max(0,-2)=0
+    assert len(trace.texts) == 4

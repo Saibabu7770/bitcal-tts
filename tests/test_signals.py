@@ -28,3 +28,15 @@ def test_hidden_stability():
     b = a.clone()
     s = hidden_state_stability([a, b])
     assert s > 0.99
+
+
+def test_hidden_skips_none_and_empty():
+    assert hidden_state_stability([None, None]) == 1.0
+    assert hidden_state_stability([torch.tensor([]), torch.tensor([])]) == 1.0
+
+
+def test_hidden_mismatched_lengths():
+    a = torch.randn(4)
+    b = torch.randn(8)
+    s = hidden_state_stability([a, b])
+    assert -1.0 <= s <= 1.0

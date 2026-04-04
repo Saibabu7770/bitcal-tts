@@ -13,7 +13,7 @@ def hidden_state_stability(
     """
     Mean cosine similarity between consecutive non-None hidden states.
 
-    Returns 1.0 if fewer than two usable tensors.
+    Returns 1.0 if fewer than two usable tensors. Empty tensors are skipped.
     """
     vecs: List[torch.Tensor] = []
     for h in hiddens:
@@ -22,15 +22,12 @@ def hidden_state_stability(
         v = h.detach().float().reshape(-1)
         if v.numel() == 0:
             continue
-        vecs.append(v / (v.norm() + 1e-8))
+        n = v.norm()
+        vecs.append(v / (n + 1e-8))
     if len(vecs) < 2:
         return 1.0
-    sims = []
+    sims: List[float] = []
     for a, b in zip(vecs[:-1], vecs[1:]):
         m = min(a.numel(), b.numel())
-        if m == 0:
-            continue
         sims.append(float((a[:m] * b[:m]).sum().item()))
-    if not sims:
-        return 1.0
     return sum(sims) / len(sims)

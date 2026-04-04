@@ -8,9 +8,11 @@ Optional 4/8-bit: bitsandbytes + compatible GPU.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 
 import torch
+
+LoadCausalLMFn = Callable[..., Tuple[Any, Any]]
 
 
 def transformers_available() -> bool:
@@ -40,6 +42,9 @@ def load_causal_lm(
 ) -> Tuple[Any, Any]:
     """Load AutoModelForCausalLM + tokenizer. Uses float32 on CPU if no GPU."""
     from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    if load_in_4bit and load_in_8bit:
+        raise ValueError("Specify at most one of load_in_4bit and load_in_8bit")
 
     if torch_dtype is None:
         torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
@@ -81,29 +86,52 @@ def forward_last_logits(
         out = model(**inputs, output_hidden_states=output_hidden_states)
     logits = out.logits[0, -1]
     hidden = None
-    if output_hidden_states and out.hidden_states is not None:
+    if output_hidden_states and getattr(out, "hidden_states", None) is not None:
         hidden = out.hidden_states[-1][0, -1]
     return ForwardResult(logits_last=logits, hidden_last=hidden, prompt=prompt)
 
 
-def hf_smoke_forward(model_name: str, prompt: str) -> ForwardResult:
-    """CLI helper: load model and run one forward; prints entropy of last-token distribution."""
+def hf_smoke_forward(
+    model_name: str,
+    prompt: str,
+    *,
+    load_fn: Optional[LoadCausalLMFn] = None,
+    device_map: str | None | dict[str, Any] = None,
+) -> ForwardResult:
+    """
+    Load model and run one forward; intended for CLI smoke tests.
+
+    Parameters
+    ----------
+    load_fn
+        Override for testing (inject mock loader). Defaults to load_causal_lm.
+    device_map
+        If None, uses ``\"auto\"`` on CUDA else CPU placement.
+    """
     if not transformers_available():
         raise RuntimeError("Install transformers: pip install bitcal-tts[research]")
 
-    from bitcal_tts.signals.entropy import token_entropy
+    loader = load_fn or load_causal_lm
+    if device_map is None:
+        device_map = "auto" if torch.cuda.is_available() else None
 
-    dm = "auto" if torch.cuda.is_available() else None
-    model, tokenizer = load_causal_lm(
+    model, tokenizer = loader(
         model_name,
         load_in_4bit=False,
         load_in_8bit=False,
-        device_map=dm,
+        device_map=device_map,
     )
     if not torch.cuda.is_available():
         model = model.to(torch.device("cpu"))
 
-    res = forward_last_logits(model, tokenizer, prompt)
+    return forward_last_logits(model, tokenizer, prompt)
+
+
+def hf_smoke_report(model_name: str, prompt: str, *, load_fn: Optional[LoadCausalLMFn] = None) -> ForwardResult:
+    """Run hf_smoke_forward and print entropy summary (CLI)."""
+    from bitcal_tts.signals.entropy import token_entropy
+
+    res = hf_smoke_forward(model_name, prompt, load_fn=load_fn)
     ent = token_entropy(res.logits_last)
     print(f"model={model_name!r} prompt={prompt!r}")
     print(f"  last-token entropy (nats): {ent:.4f}")

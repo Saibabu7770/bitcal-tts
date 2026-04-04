@@ -1,3 +1,7 @@
-from bitcal_tts.calibrator.bit_aware import BitAwareCalibrator, calibrate_confidence
+from bitcal_tts.calibrator.bit_aware import (
+    BitAwareCalibrator,
+    calibrate_confidence,
+    effective_scale_for_bit_width,
+)
 
-__all__ = ["BitAwareCalibrator", "calibrate_confidence"]
+__all__ = ["BitAwareCalibrator", "calibrate_confidence", "effective_scale_for_bit_width"]
