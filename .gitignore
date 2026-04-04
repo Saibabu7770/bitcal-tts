@@ -1,0 +1,52 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Distribution / build
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Experiment outputs (keep structure, ignore heavy logs)
+results/raw/*
+!results/raw/.gitkeep
+results/processed/*
+!results/processed/.gitkeep
+*.log
+wandb/
+
+# Models / checkpoints (large)
+checkpoints/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local env / secrets
+.env
+.env.local

@@ -1,0 +1,36 @@
+# BitCal-TTS default experiment config
+project:
+  name: bitcal-tts
+  seed: 42
+
+model:
+  name_or_path: ""  # set to HF id or local path
+  load_in_4bit: false
+  load_in_8bit: false
+  torch_dtype: float16
+
+inference:
+  max_new_tokens: 512
+  max_reasoning_steps: 64
+  temperature: 0.7
+  top_p: 0.95
+
+budget:
+  max_reasoning_tokens: 2048
+  max_wall_ms: null  # optional
+
+signals:
+  entropy_window: 4
+  trace_min_chars: 8
+
+calibrator:
+  bit_width_default: 8  # 4, 8, 16 used for bit-aware scaling
+  temperature: 1.0
+
+policy:
+  stop_entropy_threshold: 2.0
+  escalate_entropy_threshold: 4.0
+  min_budget_to_continue: 32
+
+eval:
+  output_dir: results/raw

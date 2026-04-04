@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bitcal-tts"
+version = "0.1.0"
+description = "Bit-calibrated test-time scaling for quantized reasoning models"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "BitCal-TTS contributors" }]
+keywords = ["llm", "quantization", "reasoning", "test-time compute", "calibration", "pytorch"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "torch>=2.1.0",
+  "numpy>=1.24.0",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4.0", "pytest-cov>=4.1.0"]
+research = [
+  "transformers>=4.38.0",
+  "accelerate>=0.27.0",
+  "pandas>=2.0.0",
+  "scipy>=1.11.0",
+]
+
+[project.urls]
+# After creating the GitHub repository, replace YOUR_ORG with your username or organization.
+Homepage = "https://github.com/YOUR_ORG/bitcal-tts"
+Repository = "https://github.com/YOUR_ORG/bitcal-tts"
+Issues = "https://github.com/YOUR_ORG/bitcal-tts/issues"
+
+[project.scripts]
+bitcal-tts = "bitcal_tts.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]

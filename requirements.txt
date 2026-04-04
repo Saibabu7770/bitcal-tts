@@ -1,0 +1,11 @@
+# BitCal-TTS research stack (Python 3.10+)
+# Optional: bitsandbytes for 4/8-bit loading (install separately if needed).
+torch>=2.1.0
+transformers>=4.38.0
+accelerate>=0.27.0
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.11.0
+pyyaml>=6.0
+pytest>=7.4.0
+pytest-cov>=4.1.0
