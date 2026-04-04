@@ -30,3 +30,7 @@ Match existing module layout and typing style. Prefer small, testable functions.
 ## Research vs. library
 
 Core logic should remain runnable on CPU in CI (mock or tiny models). Heavy model runs and large benchmarks are optional and can live behind scripts or environment flags.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for how to report sensitive issues.

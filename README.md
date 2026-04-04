@@ -8,53 +8,85 @@
 
 Lightweight, **model-agnostic** control loop for **budgeted reasoning** with quantized LLMs: online uncertainty signals, **bit-aware** confidence calibration, and **continue / stop / escalate** decisions—without retraining the base model.
 
-## Why BitCal-TTS?
-
-Quantized reasoning models are efficient but **confidence signals used for adaptive inference** (entropy, trace stability, hidden-state agreement) can be miscalibrated relative to full precision. Under a **fixed token budget**, that leads to poor accuracy–efficiency tradeoffs: stopping too early, running too long, or inconsistent halting across bit widths.
-
-**BitCal-TTS** applies a **quantization-aware calibration** layer on top of standard signals so halting decisions respect effective precision (e.g., 4-bit vs 8-bit vs 16-bit), improving **budgeted** reasoning quality in a reproducible, open-source pipeline.
+**Current release:** `v0.1.0` (research / alpha). Install from this repository; [PyPI publishing](https://pypi.org) is not set up yet—use `git clone` or `pip install` from GitHub (see below).
 
 ---
 
-## Features
+## For new users (quick checklist)
 
-| Component | Description |
-|-----------|-------------|
-| **Signals** | Token entropy, reasoning-trace stability, optional hidden-state stability |
-| **Calibration** | Bit-aware confidence mapping (conservative at lower effective precision) |
-| **Policy** | Halting actions: `continue`, `stop`, `escalate` (hook for more compute / precision) |
-| **Evaluation** | Trace summaries and halting-centric metrics (tokens, escalations, efficiency) |
-| **Integration** | Optional Hugging Face causal LM forward pass (`hf-smoke`) for development |
+| Step | Command | What success looks like |
+|------|---------|-------------------------|
+| 1. Get the code | Clone or `pip install` from Git (below) | You have `bitcal_tts` importable |
+| 2. Install deps | `pip install -e ".[dev,research]"` from repo root | No install errors |
+| 3. Verify | `bitcal-tts doctor` | Prints Python, torch, transformers, PyYAML versions |
+| 4. Run demo | `bitcal-tts demo --max-steps 2` | Prints steps, metrics, halting actions |
+| 5. Run tests | `python -m pytest tests/ -q --no-cov` | `passed` (or use default pytest for coverage gate) |
 
-This repository is **research-oriented**: core tests run on **CPU** with mocks; real model runs are optional and use your GPU / cluster.
+If all five pass on your machine, your environment matches what we test in [CI](https://github.com/Saibabu7770/bitcal-tts/actions) (Ubuntu, Python 3.10–3.13).
+
+---
+
+## Requirements
+
+- **Python** 3.10, 3.11, 3.12, or 3.13
+- **OS:** Linux, macOS, or Windows
+- **Hardware:** CPU is enough for tests and the mock demo; a **GPU** is optional for real model runs (`hf-smoke`, future experiments)
+- **Disk / network:** optional Hugging Face commands download model weights on first use
 
 ---
 
 ## Installation
 
-### From source (recommended for development)
+### Option A — Clone (recommended)
 
 ```bash
 git clone https://github.com/Saibabu7770/bitcal-tts.git
 cd bitcal-tts
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+```
+
+Activate the venv:
+
+- **Linux / macOS:** `source .venv/bin/activate`
+- **Windows (PowerShell):** `.\.venv\Scripts\Activate.ps1`
+- **Windows (cmd):** `.\.venv\Scripts\activate.bat`
+
+Then:
+
+```bash
+python -m pip install --upgrade pip
 pip install -e ".[dev,research]"
 ```
 
-### Minimal install (library + tests only)
+### Option B — Install from GitHub without cloning (pip)
+
+Install the package directly (non-editable):
 
 ```bash
-pip install -e ".[dev]"
+pip install "bitcal-tts[dev,research] @ git+https://github.com/Saibabu7770/bitcal-tts.git"
 ```
 
-Optional: `pip install -r requirements.txt` for a flat dependency list aligned with experiments.
+Minimal (library + tests only):
+
+```bash
+pip install "bitcal-tts[dev] @ git+https://github.com/Saibabu7770/bitcal-tts.git"
+```
+
+### Option C — Flat `requirements.txt`
+
+From a clone:
+
+```bash
+pip install -r requirements.txt
+```
+
+For development you still should install the package in editable mode: `pip install -e ".[dev,research]"`.
 
 ---
 
 ## Quick start
 
-**Mock end-to-end demo** (no GPU, no downloads):
+**Mock demo** (no GPU, no model download):
 
 ```bash
 python -m bitcal_tts demo
@@ -62,22 +94,40 @@ python -m bitcal_tts demo
 bitcal-tts demo --config configs/default.yaml
 ```
 
-**Check environment**:
+**Environment check:**
 
 ```bash
 bitcal-tts doctor
 ```
 
-**Optional Hugging Face smoke test** (downloads weights; requires `[research]`):
+**Optional — Hugging Face smoke test** (downloads a small model; needs `[research]`):
 
 ```bash
 bitcal-tts hf-smoke --model gpt2 --prompt "Hello"
 ```
 
-**Legacy script** (same as `demo`):
+On a machine with **CUDA** and a proper PyTorch build, `hf-smoke` can use the GPU automatically.
+
+**Legacy entry point** (same as `demo`):
 
 ```bash
 python scripts/run_baseline_demo.py --config configs/default.yaml
+```
+
+---
+
+## Testing
+
+Run the full suite **without** the coverage gate (fast):
+
+```bash
+python -m pytest tests/ -q --no-cov
+```
+
+Run with **coverage** (same as default `pytest` in this repo; enforces ≥90% line coverage on `bitcal_tts`):
+
+```bash
+python -m pytest tests/ -q
 ```
 
 ---
@@ -92,36 +142,56 @@ bitcal-tts/
   scripts/            # Convenience runners
   tests/              # Pytest suite (CPU-safe)
   results/            # Local experiment outputs (gitignored except .gitkeep)
-  .github/workflows/  # CI (pytest on push/PR)
+  .github/workflows/  # CI
 ```
 
 ---
 
 ## Configuration
 
-Edit `configs/default.yaml` for token budgets, policy thresholds, and calibrator settings (bit width, temperature). The demo script merges CLI flags with YAML when `--config` is passed.
+Edit [`configs/default.yaml`](configs/default.yaml) for token budgets, policy thresholds, and calibrator settings (bit width, temperature). The demo merges CLI flags with YAML when `--config` is passed.
 
 ---
 
-## Testing
+## Troubleshooting
 
-```bash
-python -m pytest tests/ -q
-```
+| Problem | What to try |
+|---------|-------------|
+| **`git push` asks for password and fails** | GitHub requires a **Personal Access Token** (or SSH), not your account password. See [GitHub docs on HTTPS](https://docs.github.com/en/get-started/git-basics/about-remote-repositories). |
+| **`transformers` / model download errors** | Install extras: `pip install -e ".[research]"`. Check network and disk space. |
+| **`bitsandbytes` / 4-bit load fails** | Optional dependency; install per [bitsandbytes](https://github.com/bitsandbytes-foundation/bitsandbytes) for your OS/GPU. Not required for tests. |
+| **Tests fail only with coverage** | Run `pytest tests/ --no-cov` first. If that passes, failures are coverage-related or environment-specific. |
+| **CUDA not seen** | Install the PyTorch build that matches your CUDA from [pytorch.org](https://pytorch.org). `bitcal-tts doctor` shows `cuda available: True/False`. |
 
-With coverage:
+---
 
-```bash
-python -m pytest tests/ --cov=bitcal_tts --cov-report=term-missing
-```
+## Why BitCal-TTS?
+
+Quantized reasoning models are efficient but **confidence signals** used for adaptive inference (entropy, trace stability, hidden-state agreement) can be miscalibrated relative to full precision. Under a **fixed token budget**, that hurts accuracy–efficiency tradeoffs.
+
+**BitCal-TTS** adds **quantization-aware calibration** on top of standard signals so halting respects effective precision (e.g., 4-bit vs 8-bit vs 16-bit), in a reproducible open-source pipeline.
+
+---
+
+## Features
+
+| Component | Description |
+|-----------|-------------|
+| **Signals** | Token entropy, reasoning-trace stability, optional hidden-state stability |
+| **Calibration** | Bit-aware confidence mapping (more conservative at lower effective precision) |
+| **Policy** | Halting: `continue`, `stop`, `escalate` |
+| **Evaluation** | Trace summaries and halting metrics (tokens, escalations, efficiency) |
+| **Integration** | Optional Hugging Face forward pass (`hf-smoke`) |
+
+Core tests run on **CPU** with mocks; large-model experiments are optional.
 
 ---
 
 ## Roadmap
 
-- [ ] Full **baseline** sweeps: fixed budget vs BitCal-TTS vs non-bit-aware halting on public reasoning benchmarks
-- [ ] **vLLM** / server-style integration for latency-aware evaluation
-- [ ] **Paper** draft and artifact bundle (configs + logs + plots) after results meet success criteria in `PROJECT_PLAN.md`
+- Baseline sweeps on public reasoning benchmarks
+- Optional **vLLM** / server-style integration
+- Paper + artifact bundle when results meet [`PROJECT_PLAN.md`](PROJECT_PLAN.md) criteria
 
 ---
 
@@ -131,9 +201,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
+## Security
+
+See [SECURITY.md](SECURITY.md).
+
+---
+
 ## Citation
 
-If you use this code in research, please cite (update when the paper is public):
+If you use this code in research:
 
 ```bibtex
 @software{bitcal_tts2026,
@@ -154,4 +230,4 @@ If you use this code in research, please cite (update when the paper is public):
 
 ## Disclaimer
 
-This is **research software**. It is not warranted for production deployment without your own safety, evaluation, and compliance review.
+This is **research software** (alpha). It is **not** warranted for regulated or high-stakes production deployment without your own safety, evaluation, and compliance review.
