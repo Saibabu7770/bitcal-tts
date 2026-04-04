@@ -2,15 +2,11 @@
 
 **Bit-Calibrated Test-Time Scaling for Quantized Reasoning Models**
 
-[![CI](https://github.com/YOUR_ORG/bitcal-tts/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_ORG/bitcal-tts/actions/workflows/ci.yml)
+[![CI](https://github.com/Saibabu7770/bitcal-tts/actions/workflows/ci.yml/badge.svg)](https://github.com/Saibabu7770/bitcal-tts/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Lightweight, **model-agnostic** control loop for **budgeted reasoning** with quantized LLMs: online uncertainty signals, **bit-aware** confidence calibration, and **continue / stop / escalate** decisions—without retraining the base model.
-
-> Replace `YOUR_ORG` in badge URLs and in `pyproject.toml` `[project.urls]` after you create the GitHub repository.
-
----
 
 ## Why BitCal-TTS?
 
@@ -39,7 +35,7 @@ This repository is **research-oriented**: core tests run on **CPU** with mocks; 
 ### From source (recommended for development)
 
 ```bash
-git clone https://github.com/YOUR_ORG/bitcal-tts.git
+git clone https://github.com/Saibabu7770/bitcal-tts.git
 cd bitcal-tts
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
@@ -143,7 +139,7 @@ If you use this code in research, please cite (update when the paper is public):
 @software{bitcal_tts2026,
   title        = {BitCal-TTS: Bit-Calibrated Test-Time Scaling for Quantized Reasoning Models},
   year         = {2026},
-  url          = {https://github.com/YOUR_ORG/bitcal-tts},
+  url          = {https://github.com/Saibabu7770/bitcal-tts},
   note         = {Open-source research implementation}
 }
 ```

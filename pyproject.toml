@@ -37,10 +37,9 @@ research = [
 ]
 
 [project.urls]
-# After creating the GitHub repository, replace YOUR_ORG with your username or organization.
-Homepage = "https://github.com/YOUR_ORG/bitcal-tts"
-Repository = "https://github.com/YOUR_ORG/bitcal-tts"
-Issues = "https://github.com/YOUR_ORG/bitcal-tts/issues"
+Homepage = "https://github.com/Saibabu7770/bitcal-tts"
+Repository = "https://github.com/Saibabu7770/bitcal-tts"
+Issues = "https://github.com/Saibabu7770/bitcal-tts/issues"
 
 [project.scripts]
 bitcal-tts = "bitcal_tts.cli:main"
