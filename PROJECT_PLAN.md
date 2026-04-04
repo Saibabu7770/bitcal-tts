@@ -196,3 +196,7 @@ Project is considered successful if all conditions below are met:
 1. Freeze model/task shortlist and benchmark subsets.
 2. Implement fixed-budget baseline runner with full logging.
 3. Start signal extraction module and validate on 20-50 sample runs.
+
+## 12) Minimal first experiment (one page of results)
+
+Concrete defaults for **~8 GB VRAM**, **one model**, **one benchmark**, and three methods are documented in [docs/MINIMAL_EXPERIMENT.md](docs/MINIMAL_EXPERIMENT.md). Use that as the first milestone before the full experiment matrix in Section 7.

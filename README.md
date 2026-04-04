@@ -189,6 +189,7 @@ Core tests run on **CPU** with mocks; large-model experiments are optional.
 
 ## Roadmap
 
+- **First paper milestone:** [docs/MINIMAL_EXPERIMENT.md](docs/MINIMAL_EXPERIMENT.md) — one model, one benchmark (e.g. GSM8K subset), three methods, ~8 GB VRAM
 - Baseline sweeps on public reasoning benchmarks
 - Optional **vLLM** / server-style integration
 - Paper + artifact bundle when results meet [`PROJECT_PLAN.md`](PROJECT_PLAN.md) criteria
