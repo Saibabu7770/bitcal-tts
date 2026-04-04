@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
   "torch>=2.1.0",
@@ -35,6 +36,8 @@ research = [
   "accelerate>=0.27.0",
   "pandas>=2.0.0",
   "scipy>=1.11.0",
+  "datasets>=2.18.0",
+  "matplotlib>=3.7.0",
 ]
 
 [project.urls]

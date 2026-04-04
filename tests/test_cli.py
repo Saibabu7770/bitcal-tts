@@ -1,6 +1,9 @@
+import sys
+from unittest.mock import patch
+
 import pytest
 
-from bitcal_tts.cli import main
+from bitcal_tts.cli import _print_doctor, main
 
 
 def test_cli_demo_runs(capsys):
@@ -38,3 +41,27 @@ def test_cli_hf_smoke_mocked(monkeypatch, capsys):
     monkeypatch.setattr(hf, "hf_smoke_report", fake_report)
     main(["hf-smoke", "--model", "x", "--prompt", "y"])
     assert "mock-smoke-ok" in capsys.readouterr().out
+
+
+def test_doctor_missing_torch(capsys):
+    """Simulate torch not installed path in _print_doctor."""
+    with patch.dict(sys.modules, {"torch": None}):
+        _print_doctor()
+    out = capsys.readouterr().out
+    assert "torch" in out
+
+
+def test_doctor_missing_transformers(capsys):
+    """Simulate transformers not installed path in _print_doctor."""
+    with patch.dict(sys.modules, {"transformers": None}):
+        _print_doctor()
+    out = capsys.readouterr().out
+    assert "BitCal-TTS" in out
+
+
+def test_doctor_missing_pyyaml(capsys):
+    """Simulate pyyaml not installed path in _print_doctor."""
+    with patch.dict(sys.modules, {"yaml": None}):
+        _print_doctor()
+    out = capsys.readouterr().out
+    assert "BitCal-TTS" in out

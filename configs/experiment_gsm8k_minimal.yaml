@@ -1,0 +1,37 @@
+# BitCal-TTS minimal first experiment
+# Target: ~8 GB VRAM laptop GPU
+# Model: Qwen2.5-3B-Instruct at 4-bit weight quantization
+# Benchmark: GSM8K test, 50 items
+# Methods: fixed baseline, adaptive (non-bit-aware), BitCal-TTS (bit-aware)
+
+project:
+  name: gsm8k-minimal
+  seed: 42
+
+model:
+  name_or_path: "Qwen/Qwen2.5-3B-Instruct"
+  load_in_4bit: true
+  load_in_8bit: false
+  torch_dtype: float16
+
+experiment:
+  benchmark: gsm8k
+  benchmark_source: hf         # "hf" uses Hugging Face datasets; "jsonl" uses jsonl_path
+  n_samples: 50
+  budgets: [256, 512, 1024]
+  methods: [fixed, adaptive, bitcal_tts]
+  step_size: 16                # tokens per step in adaptive methods
+
+calibrator:
+  bit_width_default: 4         # matches 4-bit quantization above
+  temperature: 1.0
+
+policy:
+  stop_entropy_threshold: 2.0
+  escalate_entropy_threshold: 5.0
+  stop_confidence_threshold: 0.75
+  min_budget_to_continue: 16
+
+eval:
+  output_dir: results/raw
+  processed_dir: results/processed
