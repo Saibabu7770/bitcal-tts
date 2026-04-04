@@ -220,15 +220,15 @@ def main(argv: Optional[List[str]] = None) -> None:
     print_table(summary)
 
     csv_path = save_summary_csv(summary, out_dir)
-    print(f"Saved summary CSV  → {csv_path}")
+    print(f"Saved summary CSV  -> {csv_path}")
 
     pareto = plot_pareto(summary, out_dir)
     if pareto:
-        print(f"Saved Pareto plot  → {pareto}")
+        print(f"Saved Pareto plot  -> {pareto}")
 
     bar = plot_bar(summary, out_dir)
     if bar:
-        print(f"Saved bar chart    → {bar}")
+        print(f"Saved bar chart    -> {bar}")
 
 
 if __name__ == "__main__":

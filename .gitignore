@@ -30,13 +30,16 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Experiment outputs (keep structure, ignore heavy logs)
-results/raw/*
-!results/raw/.gitkeep
-results/processed/*
-!results/processed/.gitkeep
+# Experiment outputs — track JSONL results + processed outputs; ignore heavy logs
+!results/raw/*.jsonl
+!results/processed/*.csv
+!results/processed/*.pdf
+!results/processed/*.png
+!results/README.md
 *.log
 wandb/
+# Scratch coverage dumps
+coverage_out*.txt
 
 # Models / checkpoints (large)
 checkpoints/

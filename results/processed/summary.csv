@@ -1,0 +1,5 @@
+method,budget,n,accuracy,avg_tokens,token_efficiency,premature_stop_rate,overthink_rate
+adaptive,48,2,0.0,8.0,0.1667,1.0,0.0
+bitcal_tts,48,2,0.0,8.0,0.1667,1.0,0.0
+fixed,32,2,0.0,32.0,1.0,0.0,1.0
+fixed,48,2,0.0,48.0,1.0,0.0,1.0
