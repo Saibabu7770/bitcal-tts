@@ -207,9 +207,9 @@ def main(argv: Optional[List[str]] = None) -> None:
                         answer_extractor=extract_answer,
                     )
                     r = result.to_dict()
-                    print(f"→ correct={result.correct}  tokens={result.tokens_used}")
+                    print(f"-> correct={result.correct}  tokens={result.tokens_used}")
                 except Exception as exc:  # noqa: BLE001
-                    print(f"→ ERROR: {exc}")
+                    print(f"-> ERROR: {exc}")
                     r = {
                         "task_id": task.id, "method": method, "budget": bud,
                         "error": str(exc), "correct": False, "tokens_used": 0,
@@ -217,7 +217,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                 all_results.append(r)
 
     out_path = save_results(all_results, out_dir, run_id)
-    print(f"\nSaved {len(all_results)} results → {out_path}")
+    print(f"\nSaved {len(all_results)} results -> {out_path}")
     print_summary(all_results)
 
 

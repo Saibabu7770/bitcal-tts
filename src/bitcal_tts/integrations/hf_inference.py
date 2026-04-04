@@ -59,8 +59,12 @@ def load_causal_lm(
         )
 
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=trust_remote_code)
+    # transformers >= 4.45 renamed torch_dtype -> dtype; support both
+    import transformers as _tf
+    _tf_ver = tuple(int(x) for x in _tf.__version__.split(".")[:2])
+    _dtype_key = "dtype" if _tf_ver >= (4, 45) else "torch_dtype"
     kwargs: dict[str, Any] = {
-        "torch_dtype": torch_dtype,
+        _dtype_key: torch_dtype,
         "trust_remote_code": trust_remote_code,
     }
     if quant_config is not None:
