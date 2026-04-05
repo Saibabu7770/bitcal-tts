@@ -30,7 +30,9 @@ policy:
   stop_entropy_threshold: 2.0
   escalate_entropy_threshold: 5.0
   stop_confidence_threshold: 0.75
-  min_budget_to_continue: 16
+  # Must generate at least 128 tokens before halting is allowed.
+  # Math reasoning needs a minimum chain-of-thought before confident halting.
+  min_budget_to_continue: 128
 
 eval:
   output_dir: results/raw

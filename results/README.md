@@ -57,21 +57,60 @@ All raw runs are stored as JSONL in `raw/`. Processed outputs (CSV, plots) are i
 
 ---
 
+### Run 4 — Colab smoke test (1 item, budget 64, fixed only)
+| Field | Value |
+|---|---|
+| File | `raw/exp_Qwen_Qwen2.5-3B-Instruct_1775349259.jsonl` |
+| Date | 2026-04-05 |
+| Model | `Qwen/Qwen2.5-3B-Instruct` (4-bit, Colab T4 GPU) |
+| Purpose | Verify GPU + 4-bit pipeline before full run |
+
+---
+
+### Run 5 — FULL Colab experiment (50 items, budgets 256/512/1024, 3 methods, 4-bit GPU)
+| Field | Value |
+|---|---|
+| File | `raw/exp_Qwen_Qwen2.5-3B-Instruct_1775349311.jsonl` |
+| Date | 2026-04-05 |
+| Model | `Qwen/Qwen2.5-3B-Instruct` (4-bit BitsAndBytes, Colab T4 GPU) |
+| Benchmark | GSM8K test split (HF datasets), 50 items |
+| Items | 50 |
+| Budgets | 256, 512, 1024 |
+| Methods | fixed, adaptive, bitcal_tts |
+| Total rows | 450 |
+
+#### Key results (budget=512)
+| Method | Accuracy | Avg Tokens | Premature Stop Rate |
+|---|---|---|---|
+| fixed | **60.0%** | 281.1 | 0% |
+| adaptive | 4.0% | 55.7 | 90% |
+| bitcal_tts | 4.0% | 55.7 | 90% |
+
+#### Critical finding — policy parameter bug
+`min_budget_to_continue=16` caused adaptive/BitCal-TTS to halt after only 1-2 steps
+(16-55 tokens) before any chain-of-thought reasoning could complete.
+Qwen2.5-3B needs ~150-300 tokens to work through a GSM8K problem.
+
+**Fix applied:** `min_budget_to_continue` raised to **128** in
+`configs/experiment_gsm8k_minimal.yaml`. This forces the model to generate
+at least 128 tokens before the halting policy can trigger, giving the
+chain-of-thought enough room to develop.
+
+**Next step:** Re-run Run 5 with the corrected config on Colab.
+Expected result: adaptive and BitCal-TTS accuracy rises toward fixed-method
+levels while using fewer tokens; BitCal-TTS uses slightly more tokens
+than adaptive (4-bit conservatism) but with fewer wrong early stops.
+
+---
+
 ## Next runs (planned)
 
-These are the runs that will generate actual paper results.
-Run these on a GPU machine (Google Colab T4 or better):
+Re-run full experiment with corrected `min_budget_to_continue=128`:
 
 ```bash
-# Full minimal experiment: 50 items, budgets 256/512/1024, 3 methods, 4-bit
 python scripts/run_experiment.py --config configs/experiment_gsm8k_minimal.yaml
 python scripts/analyze_results.py
 ```
-
-Expected outcome (from literature + BitCal-TTS design):
-- BitCal-TTS achieves same or higher accuracy than fixed at lower avg token use
-- Premature stop rate: BitCal-TTS < adaptive (bit-aware calibration is more conservative)
-- Overthink rate: fixed > adaptive > bitcal_tts
 
 ---
 
