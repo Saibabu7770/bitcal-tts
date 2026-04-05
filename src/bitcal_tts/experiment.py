@@ -144,11 +144,22 @@ def run_adaptive_method(
         output_hidden_states=True,
     )
 
+    # Bit-aware answer-confirmation buffer:
+    # 4-bit models need more tokens after detecting the answer marker before halting.
+    # 8-bit: 8 extra tokens, 16-bit+: 0 extra tokens (halt immediately).
+    if eff_bit <= 4:
+        answer_confirm_tokens = 32
+    elif eff_bit <= 8:
+        answer_confirm_tokens = 16
+    else:
+        answer_confirm_tokens = 0
+
     tok_budget = TokenBudget(max_tokens=budget)
     trace = ReasoningTrace()
     actions: List[str] = []
     t0 = time.perf_counter()
     step = 0
+    answer_seen_at: Optional[int] = None   # total tokens when "####" was first seen
 
     while not tok_budget.exhausted() and not gen.finished:
         text_chunk, logits, hidden, n_tok = gen.step(step, tok_budget)
@@ -157,17 +168,30 @@ def run_adaptive_method(
         trace.append_step(text_chunk, logits, hidden, n_tok)
         tok_budget.consume(n_tok)
 
+        full_so_far = gen.get_full_text()
+
+        # Detect answer marker for the first time
+        if answer_seen_at is None and "####" in full_so_far:
+            answer_seen_at = trace.total_tokens
+
         ent = token_entropy(logits)
         t_stab = reasoning_trace_stability(trace.texts)
         h_stab = hidden_state_stability(trace.hidden_states)
         conf = calibrator(entropy=ent, trace_stability=t_stab, hidden_stability=h_stab, max_entropy=max_entropy)
 
-        # Only allow halting after enough tokens have been generated.
-        # Math reasoning needs a minimum chain-of-thought before confident halting.
         if trace.total_tokens >= min_tokens_before_halt:
-            act = policy.decide(entropy=ent, confidence=conf, budget_remaining=tok_budget.remaining)
+            if answer_seen_at is not None:
+                # Answer found — stop after confirmation buffer (bit-aware)
+                tokens_since_answer = trace.total_tokens - answer_seen_at
+                if tokens_since_answer >= answer_confirm_tokens:
+                    act = HaltingAction.STOP
+                else:
+                    act = HaltingAction.CONTINUE
+            else:
+                act = policy.decide(entropy=ent, confidence=conf, budget_remaining=tok_budget.remaining)
         else:
             act = HaltingAction.CONTINUE
+
         actions.append(act.value)
 
         if act in (HaltingAction.STOP, HaltingAction.ESCALATE):
