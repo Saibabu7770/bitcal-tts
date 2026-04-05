@@ -30,9 +30,12 @@ policy:
   stop_entropy_threshold: 2.0
   escalate_entropy_threshold: 5.0
   stop_confidence_threshold: 0.75
-  # Must generate at least 128 tokens before halting is allowed.
-  # Math reasoning needs a minimum chain-of-thought before confident halting.
-  min_budget_to_continue: 128
+  min_budget_to_continue: 16
+
+# Hard floor: halt policy is suppressed until this many tokens are generated.
+# Separate from policy.min_budget_to_continue (which checks tokens remaining).
+# Math reasoning on GSM8K needs ~128 tokens minimum before a confident halt.
+min_tokens_before_halt: 128
 
 eval:
   output_dir: results/raw

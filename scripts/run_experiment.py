@@ -65,6 +65,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--escalate-entropy", type=float, default=5.0)
     ap.add_argument("--stop-conf", type=float, default=0.75)
     ap.add_argument("--min-budget-continue", type=int, default=16)
+    ap.add_argument("--min-tokens-before-halt", type=int, default=128,
+                    help="Minimum tokens generated before halting policy is allowed to stop")
     return ap
 
 
@@ -102,6 +104,7 @@ def resolve_args(args: argparse.Namespace) -> argparse.Namespace:
         args.escalate_entropy = p.get("escalate_entropy_threshold", args.escalate_entropy)
         args.stop_conf = p.get("stop_confidence_threshold", args.stop_conf)
         args.min_budget_continue = p.get("min_budget_to_continue", args.min_budget_continue)
+        args.min_tokens_before_halt = cfg.get("min_tokens_before_halt", args.min_tokens_before_halt)
         args.output_dir = ev.get("output_dir", args.output_dir)
         load_in_4bit = m.get("load_in_4bit", not args.no_4bit)
         args.no_4bit = not load_in_4bit
@@ -197,14 +200,15 @@ def main(argv: Optional[List[str]] = None) -> None:
                         task_id=task.id,
                         prompt=task.prompt,
                         gold_answer=task.gold_answer,
-                        method=method,
-                        budget=bud,
-                        bit_width=args.bit_width,
-                        policy=policy,
-                        seed=args.seed,
-                        step_size=args.step_size,
-                        max_entropy=args.max_entropy,
-                        answer_extractor=extract_answer,
+                    method=method,
+                    budget=bud,
+                    bit_width=args.bit_width,
+                    policy=policy,
+                    seed=args.seed,
+                    step_size=args.step_size,
+                    max_entropy=args.max_entropy,
+                    answer_extractor=extract_answer,
+                    min_tokens_before_halt=args.min_tokens_before_halt,
                     )
                     r = result.to_dict()
                     print(f"-> correct={result.correct}  tokens={result.tokens_used}")

@@ -123,6 +123,7 @@ def run_adaptive_method(
     step_size: int,
     max_entropy: float,
     answer_extractor: Any,
+    min_tokens_before_halt: int = 128,
 ) -> ItemResult:
     """Run with step-by-step generation + halting policy."""
     from bitcal_tts.integrations.hf_generate import HFStepGenerator
@@ -160,7 +161,13 @@ def run_adaptive_method(
         t_stab = reasoning_trace_stability(trace.texts)
         h_stab = hidden_state_stability(trace.hidden_states)
         conf = calibrator(entropy=ent, trace_stability=t_stab, hidden_stability=h_stab, max_entropy=max_entropy)
-        act = policy.decide(entropy=ent, confidence=conf, budget_remaining=tok_budget.remaining)
+
+        # Only allow halting after enough tokens have been generated.
+        # Math reasoning needs a minimum chain-of-thought before confident halting.
+        if trace.total_tokens >= min_tokens_before_halt:
+            act = policy.decide(entropy=ent, confidence=conf, budget_remaining=tok_budget.remaining)
+        else:
+            act = HaltingAction.CONTINUE
         actions.append(act.value)
 
         if act in (HaltingAction.STOP, HaltingAction.ESCALATE):
@@ -214,6 +221,7 @@ def run_item(
     step_size: int,
     max_entropy: float,
     answer_extractor: Any,
+    min_tokens_before_halt: int = 128,
 ) -> ItemResult:
     if method == "fixed":
         return run_fixed_method(
@@ -241,4 +249,5 @@ def run_item(
         step_size=step_size,
         max_entropy=max_entropy,
         answer_extractor=answer_extractor,
+        min_tokens_before_halt=min_tokens_before_halt,
     )
