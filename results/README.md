@@ -139,8 +139,23 @@ The results motivate a stronger bit-aware calibration: the current implementatio
 
 ---
 
+### Run 7 — 7B Qwen2.5 experiment attempt (INTERRUPTED — data lost)
+| Field | Value |
+|---|---|
+| File | `raw/exp_Qwen_Qwen2.5-3B-Instruct_1775368229.jsonl` (1 row — smoke only) |
+| Date | 2026-04-05 |
+| Model | `Qwen/Qwen2.5-7B-Instruct` (4-bit, Colab T4 GPU) |
+| Target | 100 items × 3 methods × 3 budgets = 900 rows |
+| Outcome | **INTERRUPTED** at ~102 rows. Data not saved — old script only wrote JSONL at end of run. |
+| Fix | `scripts/run_experiment.py` now **streams each row to disk immediately** (`stream_fh.flush()` after every item). Re-run is safe to interrupt at any point. |
+
+**Action: Re-run Run 7 on Colab with the updated script.** Any row count saved is valid partial data.
+
+---
+
 ## Next steps (paper writing)
-- Draft Section 4 (Experiments) using the table above
+- **Re-run 7B experiment** (Cell 6B in `colab_experiment.ipynb`) — now safe to stop mid-run
+- Draft Section 4 (Experiments) using 3B table above + 7B data when available
 - Draft Section 3 (Method) citing bit-width scale factors
 - Submit to arXiv
 

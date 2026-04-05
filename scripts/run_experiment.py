@@ -121,6 +121,14 @@ def save_results(results: List[Dict[str, Any]], out_dir: Path, run_id: str) -> P
     return out_path
 
 
+def open_streaming_file(out_dir: Path, run_id: str) -> tuple:
+    """Open a JSONL file for streaming (one row written per result immediately)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{run_id}.jsonl"
+    fh = out_path.open("w", encoding="utf-8")
+    return fh, out_path
+
+
 def print_summary(results: List[Dict[str, Any]]) -> None:
     from collections import defaultdict
 
@@ -188,39 +196,47 @@ def main(argv: Optional[List[str]] = None) -> None:
     total = len(tasks) * len(args.budget) * len(args.methods)
     done = 0
 
-    for task in tasks:
-        for bud in args.budget:
-            for method in args.methods:
-                done += 1
-                print(f"[{done}/{total}] task={task.id}  method={method}  budget={bud}", end=" ")
-                try:
-                    result = run_item(
-                        model=model,
-                        tokenizer=tokenizer,
-                        task_id=task.id,
-                        prompt=task.prompt,
-                        gold_answer=task.gold_answer,
-                    method=method,
-                    budget=bud,
-                    bit_width=args.bit_width,
-                    policy=policy,
-                    seed=args.seed,
-                    step_size=args.step_size,
-                    max_entropy=args.max_entropy,
-                    answer_extractor=extract_answer,
-                    min_tokens_before_halt=args.min_tokens_before_halt,
-                    )
-                    r = result.to_dict()
-                    print(f"-> correct={result.correct}  tokens={result.tokens_used}")
-                except Exception as exc:  # noqa: BLE001
-                    print(f"-> ERROR: {exc}")
-                    r = {
-                        "task_id": task.id, "method": method, "budget": bud,
-                        "error": str(exc), "correct": False, "tokens_used": 0,
-                    }
-                all_results.append(r)
+    # Stream each result to disk immediately so partial runs are never lost.
+    stream_fh, out_path = open_streaming_file(out_dir, run_id)
+    print(f"Streaming results -> {out_path}")
 
-    out_path = save_results(all_results, out_dir, run_id)
+    try:
+        for task in tasks:
+            for bud in args.budget:
+                for method in args.methods:
+                    done += 1
+                    print(f"[{done}/{total}] task={task.id}  method={method}  budget={bud}", end=" ")
+                    try:
+                        result = run_item(
+                            model=model,
+                            tokenizer=tokenizer,
+                            task_id=task.id,
+                            prompt=task.prompt,
+                            gold_answer=task.gold_answer,
+                            method=method,
+                            budget=bud,
+                            bit_width=args.bit_width,
+                            policy=policy,
+                            seed=args.seed,
+                            step_size=args.step_size,
+                            max_entropy=args.max_entropy,
+                            answer_extractor=extract_answer,
+                            min_tokens_before_halt=args.min_tokens_before_halt,
+                        )
+                        r = result.to_dict()
+                        print(f"-> correct={result.correct}  tokens={result.tokens_used}")
+                    except Exception as exc:  # noqa: BLE001
+                        print(f"-> ERROR: {exc}")
+                        r = {
+                            "task_id": task.id, "method": method, "budget": bud,
+                            "error": str(exc), "correct": False, "tokens_used": 0,
+                        }
+                    all_results.append(r)
+                    stream_fh.write(json.dumps(r) + "\n")
+                    stream_fh.flush()
+    finally:
+        stream_fh.close()
+
     print(f"\nSaved {len(all_results)} results -> {out_path}")
     print_summary(all_results)
 
