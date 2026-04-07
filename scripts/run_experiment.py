@@ -13,10 +13,8 @@ Usage (from repo root with PYTHONPATH=src or after pip install -e .):
       --no-4bit --source jsonl \\
       --jsonl-path benchmarks/example_tasks.jsonl
 
-  # Gated Gemma (set HF_TOKEN env; accept license on HF model card):
-  python scripts/run_experiment.py \\
-      --model google/gemma-2-2b-it --n-samples 10 --apply-chat-template \\
-      --budget 256 512 --methods fixed adaptive bitcal_tts --source hf
+  # Gated Gemma (HF_TOKEN env; accept license on model card):
+  python scripts/run_experiment.py --config configs/experiment_gsm8k_gemma2_2b.yaml
 """
 
 from __future__ import annotations
@@ -133,6 +131,10 @@ def resolve_args(args: argparse.Namespace) -> argparse.Namespace:
         args.output_dir = ev.get("output_dir", args.output_dir)
         load_in_4bit = m.get("load_in_4bit", not args.no_4bit)
         args.no_4bit = not load_in_4bit
+        # Instruct models (e.g. Gemma): OR CLI flag with config YAML
+        args.apply_chat_template = args.apply_chat_template or bool(
+            exp.get("apply_chat_template", False)
+        )
 
     return args
 

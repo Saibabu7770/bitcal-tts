@@ -1,0 +1,42 @@
+# BitCal-TTS — Gemma 2 2B instruct (cross-vendor, same protocol as Qwen GSM8K runs)
+#
+# Requires: HF_TOKEN in environment + accept license at
+#   https://huggingface.co/google/gemma-2-2b-it
+#
+# Run:
+#   python scripts/run_experiment.py --config configs/experiment_gsm8k_gemma2_2b.yaml
+
+project:
+  name: gsm8k-gemma2-2b
+  seed: 42
+
+model:
+  name_or_path: "google/gemma-2-2b-it"
+  load_in_4bit: true
+  load_in_8bit: false
+  torch_dtype: float16
+
+experiment:
+  benchmark: gsm8k
+  benchmark_source: hf
+  n_samples: 100
+  budgets: [256, 512, 1024]
+  methods: [fixed, adaptive, bitcal_tts]
+  step_size: 16
+  apply_chat_template: true
+
+calibrator:
+  bit_width_default: 4
+  temperature: 1.0
+
+policy:
+  stop_entropy_threshold: 2.0
+  escalate_entropy_threshold: 5.0
+  stop_confidence_threshold: 0.75
+  min_budget_to_continue: 16
+
+min_tokens_before_halt: 128
+
+eval:
+  output_dir: results/raw
+  processed_dir: results/processed
