@@ -12,6 +12,11 @@ Usage (from repo root with PYTHONPATH=src or after pip install -e .):
       --model gpt2 --n-samples 2 --budget 64 --step-size 8 \\
       --no-4bit --source jsonl \\
       --jsonl-path benchmarks/example_tasks.jsonl
+
+  # Gated Gemma (set HF_TOKEN env; accept license on HF model card):
+  python scripts/run_experiment.py \\
+      --model google/gemma-2-2b-it --n-samples 10 --apply-chat-template \\
+      --budget 256 512 --methods fixed adaptive bitcal_tts --source hf
 """
 
 from __future__ import annotations
@@ -37,6 +42,21 @@ from bitcal_tts.experiment import METHODS, run_item
 from bitcal_tts.integrations.hf_inference import load_causal_lm
 from bitcal_tts.policy.halting import HaltingPolicy
 from benchmarks.gsm8k_loader import answers_match, extract_answer, load_gsm8k
+
+
+def _format_prompt_with_chat_template(tokenizer: Any, user_text: str, apply: bool) -> str:
+    """Wrap plain user text in the model's chat template (needed for Gemma / many instruct models)."""
+    if not apply:
+        return user_text
+    tpl = getattr(tokenizer, "chat_template", None)
+    if not tpl:
+        return user_text
+    messages = [{"role": "user", "content": user_text}]
+    return tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -67,6 +87,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--min-budget-continue", type=int, default=16)
     ap.add_argument("--min-tokens-before-halt", type=int, default=128,
                     help="Minimum tokens generated before halting policy is allowed to stop")
+    ap.add_argument(
+        "--apply-chat-template",
+        action="store_true",
+        help="Wrap each task prompt with tokenizer.apply_chat_template (use for Gemma / HF instruct models)",
+    )
     return ap
 
 
@@ -181,6 +206,8 @@ def main(argv: Optional[List[str]] = None) -> None:
         model = model.to(torch.device("cpu"))
     model.eval()
     print("  Model loaded.")
+    if args.apply_chat_template and not getattr(tokenizer, "chat_template", None):
+        print("  [warn] --apply-chat-template set but tokenizer has no chat_template; using raw prompts.")
 
     policy = HaltingPolicy(
         stop_entropy_threshold=args.stop_entropy,
@@ -207,11 +234,14 @@ def main(argv: Optional[List[str]] = None) -> None:
                     done += 1
                     print(f"[{done}/{total}] task={task.id}  method={method}  budget={bud}", end=" ")
                     try:
+                        prompt = _format_prompt_with_chat_template(
+                            tokenizer, task.prompt, args.apply_chat_template
+                        )
                         result = run_item(
                             model=model,
                             tokenizer=tokenizer,
                             task_id=task.id,
-                            prompt=task.prompt,
+                            prompt=prompt,
                             gold_answer=task.gold_answer,
                             method=method,
                             budget=bud,

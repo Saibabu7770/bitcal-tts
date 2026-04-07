@@ -7,6 +7,7 @@ Optional 4/8-bit: bitsandbytes + compatible GPU.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Any, Callable, Optional, Tuple
 
@@ -58,7 +59,12 @@ def load_causal_lm(
             load_in_8bit=load_in_8bit,
         )
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=trust_remote_code)
+    _hf_token = os.environ.get("HF_TOKEN")
+    _tok_kw: dict[str, Any] = {"token": _hf_token} if _hf_token else {}
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_name_or_path, trust_remote_code=trust_remote_code, **_tok_kw
+    )
     # transformers >= 4.45 renamed torch_dtype -> dtype; support both
     import transformers as _tf
     _tf_ver = tuple(int(x) for x in _tf.__version__.split(".")[:2])
@@ -71,7 +77,7 @@ def load_causal_lm(
         kwargs["quantization_config"] = quant_config
     if device_map is not None:
         kwargs["device_map"] = device_map
-    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **kwargs)
+    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **kwargs, **_tok_kw)
     return model, tokenizer
 
 
