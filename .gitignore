@@ -35,6 +35,9 @@ Thumbs.db
 !results/processed/*.csv
 !results/processed/*.pdf
 !results/processed/*.png
+!results/processed/7b/*.csv
+!results/processed/7b/*.pdf
+!results/processed/7b/*.png
 !results/README.md
 *.log
 wandb/

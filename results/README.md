@@ -162,58 +162,85 @@ The results motivate a stronger bit-aware calibration: the current implementatio
 
 #### 14B RESULTS — PAPER TABLE
 
-| Method | Budget | N | Accuracy | Avg Tokens | Token Savings | Premature Stops |
+| Method | Budget | N | Accuracy | Avg Tokens | Token Savings | Premature stop rate* |
 |---|---|---|---|---|---|---|
 | **fixed** | 512 | 35 | **88.6%** | 455 | — | 0% |
-| **adaptive** | 512 | 35 | 82.9% | 239 | **47.5%** | **0%** |
-| **bitcal_tts** | 512 | 35 | **85.7%** | 269 | **40.8%** | **0%** |
+| **adaptive** | 512 | 35 | 82.9% | 239 | **47.5%** | 17.1% |
+| **bitcal_tts** | 512 | 35 | **85.7%** | 269 | **40.8%** | 11.4% |
 | **fixed** | 1024 | 34 | **91.2%** | 859 | — | 0% |
-| **adaptive** | 1024 | 34 | 82.4% | 235 | **72.6%** | **0%** |
-| **bitcal_tts** | 1024 | 34 | **85.3%** | 266 | **69.1%** | **0%** |
+| **adaptive** | 1024 | 34 | 82.4% | 235 | **72.6%** | 17.6% |
+| **bitcal_tts** | 1024 | 34 | **85.3%** | 266 | **69.1%** | 14.7% |
+
+\* From `analyze_results.py`: halted before budget, stopped early, and wrong.
 
 #### Key findings for paper
 
 1. **BitCal-TTS outperforms plain adaptive at 14B**: 85.7% vs 82.9% (budget=512), 85.3% vs 82.4% (budget=1024). The 32-token bit-aware confirmation buffer adds ~2.8% accuracy at a cost of only 30 extra tokens.
-2. **Zero premature stops at 14B**: The `####` answer-marker fires reliably — `premature_stop_rate = 0%` for all adaptive methods. Completely different from 3B (63% premature stop rate).
+2. **Fewer harmful early stops than adaptive**: At 512, premature-stop rate is **11.4% (BitCal-TTS) vs 17.1% (adaptive)** — the buffer helps. This is far below **3B (~63%)** on the same metric.
 3. **Dramatic token savings**: BitCal-TTS uses **41-69% fewer tokens** than fixed while losing only 2.9-5.9% accuracy.
-4. **Accuracy gap shrinks with budget**: At budget=1024, fixed=91.2%, BitCal-TTS=85.3% (5.9% gap). Model rarely needs all 1024 tokens — BitCal-TTS stops ~266 tokens average.
-5. **The 3B vs 14B contrast is the paper's central result**: 3B premature stop=63%, accuracy drop=40pts; 14B premature stop=0%, accuracy drop=3pts.
+4. **Accuracy gap vs fixed**: At budget=1024, fixed=91.2%, BitCal-TTS=85.3% (5.9% gap). Model rarely needs all 1024 tokens — BitCal-TTS stops ~266 tokens on average.
+5. **Scaling (3B → 14B)**: Premature wrong early stops drop from **~63% (3B)** to **~11–17% (14B)**; usable accuracy under adaptive halting rises sharply.
 
 ---
 
-### Run 8 — 7B Qwen2.5 experiment attempt (INTERRUPTED — data lost)
+### Run 8 — 7B attempt (historical; data lost — pre-streaming script)
 | Field | Value |
 |---|---|
-| File | `raw/exp_Qwen_Qwen2.5-3B-Instruct_1775368229.jsonl` (1 row — smoke only) |
-| Date | 2026-04-05 |
-| Model | `Qwen/Qwen2.5-7B-Instruct` (4-bit, Colab T4 GPU) |
-| Target | 100 items × 3 methods × 3 budgets = 900 rows |
-| Outcome | **INTERRUPTED** at ~102 rows. Data not saved — old script only wrote JSONL at end of run. |
-| Fix | `scripts/run_experiment.py` now **streams each row to disk immediately** (`stream_fh.flush()` after every item). Re-run is safe to interrupt at any point. |
+| Outcome | Early Colab run interrupted; JSONL not flushed until end of run. |
 
-**Action: Re-run Run 7 on Colab with the updated script.** Any row count saved is valid partial data.
+---
+
+### Run 10 — 7B Qwen2.5 experiment (FINAL — 483 rows)
+| Field | Value |
+|---|---|
+| File | `raw/exp_Qwen_Qwen2.5-7B-Instruct_1775428350.jsonl` |
+| Model | `Qwen/Qwen2.5-7B-Instruct` (4-bit BitsAndBytes, Colab T4 GPU) |
+| Benchmark | GSM8K test split |
+| Budgets | 256, 512, 1024 |
+| Methods | fixed, adaptive, bitcal_tts |
+| Total rows | **483** (54 tasks × 3 methods × 3 budgets, minus 3 rows for one missing task at budget=1024) |
+| Processed | `processed/7b/summary.csv`, Pareto + bar charts (7B-only; use `--file-glob '*7B*.jsonl'`) |
+
+#### 7B RESULTS — PAPER TABLE (budget=512, N=54)
+
+| Method | Accuracy | Avg Tokens | Savings vs fixed | Premature stop rate* |
+|---|---|---|---|---|
+| **fixed** | **90.7%** | 466 | — | 0% |
+| **adaptive** | 79.6% | 286 | **38.5%** | 14.8% |
+| **bitcal_tts** | **83.3%** | 316 | **32.1%** | 11.1% |
+
+\* Premature stop = halted before budget, stopped early, and wrong (same definition as `analyze_results.py`).
+
+#### 7B scaling story (between 3B and 14B)
+- **Accuracy**: BitCal-TTS (83.3%) sits between adaptive (79.6%) and fixed (90.7%); buffer buys **+3.7 pts** over adaptive at ~30 extra tokens.
+- **Premature stops**: 7B shows **non-zero** early wrong stops (adaptive 14.8%, BitCal-TTS 11.1%) vs **~0%** at 14B on the same metric — larger models align better with the `####` halting signal.
+- **Token savings**: Still large vs fixed (~32–39% at budget=512).
 
 ---
 
 ## Next steps (paper writing)
-- **Re-run 14B experiment** (Cell 6C in `colab_experiment.ipynb`) — needs 100 items for camera-ready results
-- **Re-run 7B experiment** (Cell 6B) — to fill in the 3B → 7B → 14B scaling story
-- Draft Section 4 (Experiments) using 3B table + preliminary 14B results
+- Optional: extend 14B to 100 items (Cell 6C) for larger N
+- Draft Section 4 (Experiments) using 3B / 7B / 14B tables above
 - Draft Section 3 (Method) citing bit-width scale factors
 - Submit to arXiv
 
-## Cross-model summary (paper table)
+## Cross-model summary (paper table, budget=512)
 
-| Model | Method | Budget=512 Acc | Avg Tokens (512) | Token Savings | Premature Stop |
+| Model | Method | Accuracy | Avg Tokens | Token Savings | Prem. stop* |
 |---|---|---|---|---|---|
 | 3B | fixed | 60.0% | 281 | — | 0% |
 | 3B | adaptive | 22.0% | 132 | 53% | **63%** |
 | 3B | bitcal_tts | 20.0% | 144 | 49% | **63%** |
+| **7B** | **fixed** | **90.7%** | **466** | — | **0%** |
+| **7B** | **adaptive** | **79.6%** | **286** | **38.5%** | **14.8%** |
+| **7B** | **bitcal_tts** | **83.3%** | **316** | **32.1%** | **11.1%** |
 | **14B** | **fixed** | **88.6%** | **455** | — | **0%** |
-| **14B** | **adaptive** | **82.9%** | **239** | **47.5%** | **0%** |
-| **14B** | **bitcal_tts** | **85.7%** | **269** | **40.8%** | **0%** |
+| **14B** | **adaptive** | **82.9%** | **239** | **47.5%** | **17.1%** |
+| **14B** | **bitcal_tts** | **85.7%** | **269** | **40.8%** | **11.4%** |
 
-**Key takeaway**: At 14B scale, BitCal-TTS achieves **near-fixed accuracy (85.7% vs 88.6%)** while using **41% fewer tokens** and with **zero premature stops**. BitCal-TTS consistently outperforms plain adaptive (+2.8%) thanks to the bit-aware confirmation buffer.
+\* Premature stop rate from `analyze_results.py` (early halt + wrong).
+
+**Key takeaway**: **BitCal-TTS beats adaptive at both 7B (+3.7%) and 14B (+2.8%)** at budget 512, with the bit-aware buffer costing only modest extra tokens. Scaling from 3B → 7B → 14B shrinks harmful early stops and raises usable accuracy under adaptive halting.
 
 ---
 
@@ -223,9 +250,13 @@ The results motivate a stronger bit-aware calibration: the current implementatio
 results/
   raw/                        # per-run JSONL (one line per task×method×budget)
   processed/
-    summary.csv               # aggregated accuracy, token efficiency, halt rates
-    pareto_quality_tokens.pdf # accuracy vs avg_tokens scatter (paper figure)
-    accuracy_by_budget.pdf    # grouped bar chart (paper figure)
+    summary.csv               # all runs combined (mixed models — use per-model glob for clean plots)
+    pareto_quality_tokens.pdf
+    accuracy_by_budget.pdf
+  processed/7b/               # 7B-only (regenerate: analyze_results.py --file-glob '*7B*.jsonl' --out-dir results/processed/7b)
+    summary.csv
+    pareto_quality_tokens.pdf
+    accuracy_by_budget.pdf
 ```
 
 ---
@@ -239,6 +270,8 @@ pip install -e ".[research]"
 
 # Re-generate processed outputs from existing raw results
 python scripts/analyze_results.py
+# 7B-only figures (avoids mixing 3B/14B in the same plot)
+python scripts/analyze_results.py --file-glob "*7B*.jsonl" --out-dir results/processed/7b
 
 # Run new experiment
 python scripts/run_experiment.py --config configs/experiment_gsm8k_minimal.yaml

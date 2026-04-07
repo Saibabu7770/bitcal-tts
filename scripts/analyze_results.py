@@ -26,9 +26,11 @@ if str(_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_ROOT / "src"))
 
 
-def load_all_results(results_dir: Path) -> List[Dict[str, Any]]:
+def load_all_results(results_dir: Path, file_glob: str = "*.jsonl") -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
-    for p in sorted(results_dir.glob("*.jsonl")):
+    for p in sorted(results_dir.glob(file_glob)):
+        if not p.is_file():
+            continue
         with p.open("r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -204,12 +206,18 @@ def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description="Analyze BitCal-TTS results")
     ap.add_argument("--results-dir", type=str, default="results/raw")
     ap.add_argument("--out-dir", type=str, default="results/processed")
+    ap.add_argument(
+        "--file-glob",
+        type=str,
+        default="*.jsonl",
+        help="Only load JSONL files matching this glob under results-dir (e.g. '*7B*.jsonl')",
+    )
     args = ap.parse_args(argv)
 
     results_dir = _ROOT / args.results_dir
     out_dir = _ROOT / args.out_dir
 
-    rows = load_all_results(results_dir)
+    rows = load_all_results(results_dir, file_glob=args.file_glob)
     if not rows:
         print(f"[warn] No result files found in {results_dir}")
         return
