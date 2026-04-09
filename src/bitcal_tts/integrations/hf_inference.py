@@ -60,6 +60,13 @@ def load_causal_lm(
         )
 
     _hf_token = os.environ.get("HF_TOKEN")
+    if not _hf_token:
+        try:
+            from huggingface_hub import get_token
+
+            _hf_token = get_token()
+        except Exception:
+            _hf_token = None
     _tok_kw: dict[str, Any] = {"token": _hf_token} if _hf_token else {}
 
     tokenizer = AutoTokenizer.from_pretrained(
