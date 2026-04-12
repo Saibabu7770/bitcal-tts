@@ -2,6 +2,11 @@
 
 **Bit-Calibrated Test-Time Scaling for Quantized Reasoning Models**
 
+
+
+<img width="848" height="485" alt="image" src="https://github.com/user-attachments/assets/a7de5452-5852-4107-b228-c0b07d1d6384" />
+
+
 [![CI](https://github.com/Saibabu7770/bitcal-tts/actions/workflows/ci.yml/badge.svg)](https://github.com/Saibabu7770/bitcal-tts/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
