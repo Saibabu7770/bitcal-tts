@@ -7,14 +7,14 @@ name = "bitcal-tts"
 version = "0.1.0"
 description = "Bit-calibrated test-time scaling for quantized reasoning models"
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [{ name = "BitCal-TTS contributors" }]
 keywords = ["llm", "quantization", "reasoning", "test-time compute", "calibration", "pytorch"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4.0", "pytest-cov>=4.1.0"]
+dev = ["pytest>=7.4.0", "pytest-cov>=4.1.0", "build>=1.2.0", "twine>=5.0.0"]
 research = [
   "transformers>=4.38.0",
   "accelerate>=0.27.0",

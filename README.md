@@ -10,10 +10,11 @@
 [![CI](https://github.com/Saibabu7770/bitcal-tts/actions/workflows/ci.yml/badge.svg)](https://github.com/Saibabu7770/bitcal-tts/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/bitcal-tts.svg)](https://pypi.org/project/bitcal-tts/)
 
 Lightweight, **model-agnostic** control loop for **budgeted reasoning** with quantized LLMs: online uncertainty signals, **bit-aware** confidence calibration, and **continue / stop / escalate** decisions—without retraining the base model.
 
-**Current release:** `v0.1.0` Install from this repository; [PyPI publishing](https://pypi.org) is not set up yet—use `git clone` or `pip install` from GitHub (see below).
+**Current release:** `v0.1.0` (research / alpha). Install from [PyPI](https://pypi.org/project/bitcal-tts/) after the first upload, or from this repository (see below). Maintainer notes: [RELEASING.md](RELEASING.md).
 
 ---
 
@@ -42,7 +43,19 @@ If all five pass on your machine, your environment matches what we test in [CI](
 
 ## Installation
 
-### Option A — Clone (recommended)
+### Option A — PyPI (after the first upload)
+
+```bash
+pip install "bitcal-tts[research]"
+```
+
+Library only (no optional research stack):
+
+```bash
+pip install bitcal-tts
+```
+
+### Option B — Clone (recommended for development)
 
 ```bash
 git clone https://github.com/Saibabu7770/bitcal-tts.git
@@ -63,7 +76,7 @@ python -m pip install --upgrade pip
 pip install -e ".[dev,research]"
 ```
 
-### Option B — Install from GitHub without cloning (pip)
+### Option C — Install from GitHub without cloning (pip)
 
 Install the package directly (non-editable):
 
@@ -77,7 +90,7 @@ Minimal (library + tests only):
 pip install "bitcal-tts[dev] @ git+https://github.com/Saibabu7770/bitcal-tts.git"
 ```
 
-### Option C — Flat `requirements.txt`
+### Option D — Flat `requirements.txt`
 
 From a clone:
 

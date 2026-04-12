@@ -1,0 +1,68 @@
+# Publish bitcal-tts to PyPI when you push a version tag (e.g. v0.1.0).
+#
+# One-time PyPI setup (trusted publishing, no API token in GitHub):
+# 1. Create the project on https://pypi.org (or claim the name when uploading the first time).
+# 2. PyPI → Your project → Publishing → Add a new pending publisher:
+#    - Owner / repo: must match this repository
+#    - Workflow filename: publish-pypi.yml
+#    - Environment name: pypi
+# 3. GitHub → Settings → Environments → New environment → name: pypi
+#    (Optional: add protection rules / required reviewers.)
+#
+# Manual upload alternative: see RELEASING.md
+
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build
+        run: python -m pip install --upgrade pip build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Verify wheel installs
+        run: |
+          python -m pip install dist/*.whl
+          python -c "import bitcal_tts; assert bitcal_tts.__version__"
+          bitcal-tts --help
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish:
+    name: Upload to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/bitcal-tts
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
