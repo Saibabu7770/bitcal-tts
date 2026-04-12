@@ -8,7 +8,7 @@
 
 Lightweight, **model-agnostic** control loop for **budgeted reasoning** with quantized LLMs: online uncertainty signals, **bit-aware** confidence calibration, and **continue / stop / escalate** decisions—without retraining the base model.
 
-**Current release:** `v0.1.0` (research / alpha). Install from this repository; [PyPI publishing](https://pypi.org) is not set up yet—use `git clone` or `pip install` from GitHub (see below).
+**Current release:** `v0.1.0` Install from this repository; [PyPI publishing](https://pypi.org) is not set up yet—use `git clone` or `pip install` from GitHub (see below).
 
 ---
 
