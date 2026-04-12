@@ -57,3 +57,13 @@ checkpoints/
 # Local env / secrets
 .env
 .env.local
+
+# Paper / manuscript (keep locally; not tracked on GitHub)
+arxiv_template.tex
+references.bib
+PAPER_DRAFT.md
+media/
+scripts/paper_figures.py
+ABSTRACT.md
+RELATED_WORK.md
+TOPIC_DECISION.md
