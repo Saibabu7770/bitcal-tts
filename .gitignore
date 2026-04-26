@@ -58,12 +58,14 @@ checkpoints/
 .env
 .env.local
 
-# Paper / manuscript (keep locally; not tracked on GitHub)
+# Paper / manuscript source — kept locally; arXiv hosts the canonical PDF.
+# The figure-generation script and the produced figures ARE tracked, because
+# the paper explicitly advertises "We release code and figure-generation
+# scripts to support full reproduction" (see README -> Reproducing the paper).
 arxiv_template.tex
 references.bib
 PAPER_DRAFT.md
-media/
-scripts/paper_figures.py
 ABSTRACT.md
 RELATED_WORK.md
 TOPIC_DECISION.md
+# media/ figures and scripts/paper_figures.py are intentionally tracked.

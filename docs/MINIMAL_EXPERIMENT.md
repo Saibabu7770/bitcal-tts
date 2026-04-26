@@ -1,5 +1,24 @@
 # Minimal first experiment (one page of results)
 
+> **Status: completed and superseded (April 2026).** The minimal protocol
+> below was the original v0.1 plan (one model, one benchmark, ~50 items).
+> It has since been **executed and extended** to all three Qwen2.5 sizes
+> (3B / 7B / 14B) under 4-bit quantization on GSM8K, and the resulting
+> tables and figures are the basis of the BitCal-TTS paper.
+>
+> For the **finished** results, see:
+>
+> - [`../results/README.md`](../results/README.md) — full run log with
+>   per-run JSONL filenames, sample sizes, and the cross-model summary.
+> - [`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md) — exact CLI for every
+>   row of Table 1 and every figure of the paper.
+> - [`../README.md`](../README.md) — headline numbers and quick rebuild.
+>
+> The text below is preserved verbatim as a historical record of the
+> minimal-experiment scoping decision.
+
+---
+
 This narrows the full matrix in [PROJECT_PLAN.md](../PROJECT_PLAN.md) to **one GPU class**, **one model**, and **one benchmark** so you can get a first credible table/figure before scaling up.
 
 ## Assumed hardware (your profile)
