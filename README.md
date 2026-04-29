@@ -10,27 +10,25 @@
 [![PyPI](https://img.shields.io/pypi/v/bitcal-tts.svg)](https://pypi.org/project/bitcal-tts/)
 [![Paper](https://img.shields.io/badge/arXiv-2026.XXXXX-b31b1b.svg)](https://arxiv.org/abs/2026.XXXXX)
 
-> **This repository is the code companion to the paper**
+
 > *BitCal-TTS: Bit-Calibrated Test-Time Scaling for Quantized Reasoning Models*
-> (preprint, April 2026). Replace `2026.XXXXX` above with the arXiv ID once
-> assigned.
+> (preprint, April 2026).  `2026.XXXXX` above with the arXiv 
+> 
 
 Lightweight, **model-agnostic** runtime controller for **budgeted reasoning**
 under post-training quantization: online uncertainty signals, **bit-aware**
 confidence calibration, and **continue / stop / escalate** halting decisions —
 **without retraining the base model**.
 
-**Current release:** `v0.2.0` (paper companion). For the previous mock-only
-release see tag `v0.1.0`.
+
 
 ---
 
 ## Headline result (GSM8K, 4-bit, $B = 512$)
 
 The numbers below come from `results/README.md` (Run 5/9/10) and exactly match
-Table 1 of the paper. Raw per-task records are in
+Table 1 . Raw per-task records are in
 [`results/raw/`](results/raw); the same protocol can be re-run from this repo
-(see [Reproducing the paper](#reproducing-the-paper)).
 
 | Model | Method     | Accuracy | Avg. tokens | Savings vs. fixed | Premature-stop |
 |-------|------------|---------:|------------:|------------------:|---------------:|
@@ -69,20 +67,20 @@ Pareto plots are in [`results/processed/`](results/processed) and
 | `configs/` | YAML experiment templates (`experiment_gsm8k_minimal.yaml`, `default.yaml`, …). |
 | `benchmarks/` | JSONL task loader + tiny example task file for unit tests. |
 | `tests/` | CPU-safe pytest suite (≥90 % line coverage on `bitcal_tts`). |
-| `results/raw/` | Per-run JSONL traces (one line per task × method × budget) — **the data the paper plots**. |
+| `results/raw/` | Per-run JSONL traces (one line per task × method × budget) — . |
 | `results/processed/` | Aggregated CSV + Pareto / accuracy-vs-budget figures. |
 | `results/README.md` | Full run log: protocol, hardware, budget sweeps, cross-model summary. |
 | `docs/` | Project plan, minimal-experiment notes, releasing notes. |
 
 ---
 
-## Reproducing the paper
+## Reproducing Results
 
-The repository ships **the raw JSONL data** behind every paper number, plus
+The repository ships **the raw JSONL data** behind every  number, plus
 the aggregation and plotting scripts, so you can rebuild every table and
 figure offline without re-running any model.
 
-### A. Rebuild the paper tables and figures from the released JSONLs
+### A. Rebuild the tables and figures from the released JSONLs
 
 ```bash
 git clone https://github.com/Saibabu7770/bitcal-tts.git
@@ -93,7 +91,7 @@ pip install -e ".[dev,research]"
 # Cross-model summary (3B + 7B + 14B) used for the headline table:
 python scripts/analyze_results.py
 
-# 7B-only Pareto + budget sweep (Figures 4 & 5 in the paper):
+# 7B-only Pareto + budget sweep :
 python scripts/analyze_results.py \
     --file-glob "*7B*.jsonl" \
     --out-dir results/processed/7b
@@ -126,7 +124,7 @@ python scripts/run_experiment.py --config configs/experiment_gsm8k_minimal.yaml 
 Or open [`colab_experiment.ipynb`](colab_experiment.ipynb) for the
 ready-to-run Colab pipeline that produced the published JSONLs.
 
-For an exhaustive row-by-row mapping (paper table cell → raw JSONL filename →
+For an exhaustive row-by-row mapping (table cell → raw JSONL filename →
 exact CLI), see [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 ---
