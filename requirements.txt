@@ -1,6 +1,6 @@
 # BitCal-TTS research stack (Python 3.10+)
 # Optional: bitsandbytes for 4/8-bit loading (install separately if needed).
-torch>=2.1.0
+torch>=2.5.0
 transformers>=4.38.0
 accelerate>=0.27.0
 datasets>=2.18.0

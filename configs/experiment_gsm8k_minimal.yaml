@@ -28,9 +28,9 @@ calibrator:
 
 policy:
   stop_entropy_threshold: 2.0
-  escalate_entropy_threshold: 5.0
+  escalate_entropy_threshold: 4.0
   stop_confidence_threshold: 0.75
-  min_budget_to_continue: 16
+  min_budget_to_continue: 32
 
 # Hard floor: halt policy is suppressed until this many tokens are generated.
 # Separate from policy.min_budget_to_continue (which checks tokens remaining).
