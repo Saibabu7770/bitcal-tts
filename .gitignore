@@ -69,3 +69,18 @@ ABSTRACT.md
 RELATED_WORK.md
 TOPIC_DECISION.md
 # media/ figures and scripts/paper_figures.py are intentionally tracked.
+
+# Local-only artifacts (raw result archives, paper drafts, sample PDFs, CV).
+# None of these belong in the public repo; the canonical paper is on arXiv
+# and the canonical results live under results/raw/ as JSONL.
+*.zip
+Sample_paper*.pdf
+resume.pdf
+Fianl submission draft/
+PREPRINT FINAL VERSION/
+
+# Internal planning notes — superseded by README.md, REPRODUCIBILITY.md, and
+# RELEASING.md. Kept locally for history; not part of the public surface.
+PROJECT_PLAN.md
+PYPI_QUICKSTART.md
+docs/MINIMAL_EXPERIMENT.md

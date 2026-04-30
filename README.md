@@ -70,7 +70,7 @@ Pareto plots are in [`results/processed/`](results/processed) and
 | `results/raw/` | Per-run JSONL traces (one line per task × method × budget) — . |
 | `results/processed/` | Aggregated CSV + Pareto / accuracy-vs-budget figures. |
 | `results/README.md` | Full run log: protocol, hardware, budget sweeps, cross-model summary. |
-| `docs/` | Project plan, minimal-experiment notes, releasing notes. |
+| `RELEASING.md` | Release process for tagging and publishing to PyPI. |
 
 ---
 
